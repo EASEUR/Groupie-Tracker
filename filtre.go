@@ -1,26 +1,25 @@
-func FilterArtists(artists []Artist, f Filters) []Artist {
-	var result []Artist
+package filters
 
-	for _, artist := range artists {
-		if artist.CreationDate < f.MinCreation || artist.CreationDate > f.MaxCreation {
-			continue
-		}
+import (
+	"strconv"
+	"strings"
+)
 
-		if artist.FirstAlbumDate < f.MinAlbum || artist.FirstAlbumDate > f.MaxAlbum {
-			continue
-		}
-
-		nbMembers := len(artist.Members)
-		if nbMembers < f.MinMembers || nbMembers > f.MaxMembers {
-			continue
-		}
-
-		if len(f.Locations) > 0 && !HasLocation(artist.Locations, f.Locations) {
-			continue
-		}
-
-		result = append(result, artist)
+func GetYear(date string) int {
+	if len(date) < 4 {
+		return 0
 	}
+	year, _ := strconv.Atoi(date[:4])
+	return year
+}
 
-	return result
+func ContainsLocation(locations []string, selected []string) bool {
+	for _, l := range locations {
+		for _, s := range selected {
+			if strings.Contains(strings.ToLower(l), strings.ToLower(s)) {
+				return true
+			}
+		}
+	}
+	return false
 }
