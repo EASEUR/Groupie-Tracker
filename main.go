@@ -1,12 +1,15 @@
 package main
 
 import (
-	"fmt"
-
-	"Groupie-Traker/api"
+	//"fmt"
+	"groupie-tracker/api"
 )
 
 func main() {
+	//  ===== TEST FYNE =====
+	api.FyneWindow()
+
+	/*
 	// ===== TEST ARTISTS =====
 	artists, err := api.GetArtists()
 	if err != nil {
@@ -40,5 +43,6 @@ func main() {
 		fmt.Println("Erreur relations :", err)
 		return
 	}
-	fmt.Println("Nombre d'entrées relations :", len(relations.Index))
+	fmt.Println("Nombre d'entrées relations :", len(relations.Index))*/
+
 }
