@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
-
-	"Groupie-Traker/api"
+	"groupie-tracker/api"
 )
 
 func main() {
+	//  ===== TEST FYNE =====
+	api.FyneWindow()
+
+	
 	// ===== TEST ARTISTS =====
 	artists, err := api.GetArtists()
 	if err != nil {
@@ -42,36 +45,46 @@ func main() {
 	}
 	fmt.Println("Nombre d'entrées relations :", len(relations.Index))
 
-
 	// ===== TEST GEOCODE =====
-	lat, lon, err := api.Geocode("Paris")
-	if err != nil {
-    	fmt.Println("Erreur geocode :", err)
-	} else {
-    	fmt.Printf("Paris : lat=%f, lon=%f\n", lat, lon)
+	fmt.Println("\n===== GEOCODE =====")
+	tests := []string{
+		"paris-france",
+		"los_angeles-usa",
+		"washington_dc-usa",
 	}
 
-	lat, lon, err = api.Geocode("New_York")
-	if err != nil {
-    	fmt.Println("Erreur geocode :", err)
-	} else {
-    	fmt.Printf("New York : lat=%f, lon=%f\n", lat, lon)
+	for _, city := range tests {
+		lat, lon, err := api.Geocode(city)
+		if err != nil {
+			fmt.Println(city, "→ erreur :", err)
+		} else {
+			fmt.Printf("%s → lat=%f lon=%f\n", city, lat, lon)
+		}
 	}
 
 	// ===== TEST ARTIST LOCATIONS =====
-	if len(relations.Index) > 0 {
-    artistID := relations.Index[0].ID
-    locs := api.GetArtistLocations(artistID, relations)
-    fmt.Printf("Lieux pour l'artiste %d : %v\n", artistID, locs)
-    
-    // Test avec geocoding des lieux
-    for _, loc := range locs {
-        lat, lon, err := api.Geocode(loc)
-        if err != nil {
-            fmt.Printf("- %s : impossible de géocoder\n", loc)
-        } else {
-            fmt.Printf("- %s : lat=%f, lon=%f\n", loc, lat, lon)
-        }
-    }
+	fmt.Println("\n===== ARTIST LOCATIONS =====")
+	artistID := 1
+	locs := api.GetArtistLocations(artistID, relations)
+	fmt.Printf("Lieux de l'artiste %d : %v\n", artistID, locs)
+
+	for _, loc := range locs {
+		lat, lon, err := api.Geocode(loc)
+		if err != nil {
+			fmt.Println(loc, "→ erreur")
+		} else {
+			fmt.Printf("%s → %f %f\n", loc, lat, lon)
+		}
+	}
+
+	// ===== TEST FILTRE =====
+	fmt.Println("\n===== FILTRE (création >= 2000) =====")
+	for _, a := range artists {
+		if a.CreationDate >= 2000 {
+			fmt.Printf("%s (%d)\n", a.Name, a.CreationDate)
+		}
+	}
+
+	select {} // garde Fyne ouvert
 }
-}
+
