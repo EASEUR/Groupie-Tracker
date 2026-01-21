@@ -5,40 +5,55 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
-	"time"
+	"strings"
 )
 
-type geoResult struct {
+type NominatimResponse []struct {
 	Lat string `json:"lat"`
 	Lon string `json:"lon"`
 }
 
-var geoClient = http.Client{
-	Timeout: 10 * time.Second,
+func cleanLocation(loc string) string {
+	loc = strings.ReplaceAll(loc, "-", " ")
+	loc = strings.ReplaceAll(loc, "_", " ")
+	return strings.Title(strings.ToLower(loc))
 }
 
 func Geocode(place string) (float64, float64, error) {
-	q := url.QueryEscape(place)
-	apiURL := fmt.Sprintf(
-		"https://nominatim.openstreetmap.org/search?q=%s&format=json&limit=1",
-		q,
-	)
-	req, _ := http.NewRequest("GET", apiURL, nil)
+	clean := cleanLocation(place)
+
+	endpoint := "https://nominatim.openstreetmap.org/search"
+	params := url.Values{}
+	params.Add("q", clean)
+	params.Add("format", "json")
+	params.Add("limit", "1")
+
+	req, err := http.NewRequest("GET", endpoint+"?"+params.Encode(), nil)
+	if err != nil {
+		return 0, 0, err
+	}
+
 	req.Header.Set("User-Agent", "groupie-tracker")
-	resp, err := geoClient.Do(req)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return 0, 0, err
 	}
 	defer resp.Body.Close()
-	var result []geoResult
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+
+	var data NominatimResponse
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return 0, 0, err
 	}
-	if len(result) == 0 {
-		return 0, 0, fmt.Errorf("no result for %s", place)
+
+	if len(data) == 0 {
+		return 0, 0, fmt.Errorf("aucun résultat pour %s", clean)
 	}
-	lat, _ := strconv.ParseFloat(result[0].Lat, 64)
-	lon, _ := strconv.ParseFloat(result[0].Lon, 64)
+
+	var lat, lon float64
+	fmt.Sscanf(data[0].Lat, "%f", &lat)
+	fmt.Sscanf(data[0].Lon, "%f", &lon)
+
 	return lat, lon, nil
 }

@@ -41,4 +41,37 @@ func main() {
 		return
 	}
 	fmt.Println("Nombre d'entrées relations :", len(relations.Index))
+
+
+	// ===== TEST GEOCODE =====
+	lat, lon, err := api.Geocode("Paris")
+	if err != nil {
+    	fmt.Println("Erreur geocode :", err)
+	} else {
+    	fmt.Printf("Paris : lat=%f, lon=%f\n", lat, lon)
+	}
+
+	lat, lon, err = api.Geocode("New_York")
+	if err != nil {
+    	fmt.Println("Erreur geocode :", err)
+	} else {
+    	fmt.Printf("New York : lat=%f, lon=%f\n", lat, lon)
+	}
+
+	// ===== TEST ARTIST LOCATIONS =====
+	if len(relations.Index) > 0 {
+    artistID := relations.Index[0].ID
+    locs := api.GetArtistLocations(artistID, relations)
+    fmt.Printf("Lieux pour l'artiste %d : %v\n", artistID, locs)
+    
+    // Test avec geocoding des lieux
+    for _, loc := range locs {
+        lat, lon, err := api.Geocode(loc)
+        if err != nil {
+            fmt.Printf("- %s : impossible de géocoder\n", loc)
+        } else {
+            fmt.Printf("- %s : lat=%f, lon=%f\n", loc, lat, lon)
+        }
+    }
+}
 }
