@@ -22,7 +22,6 @@ var geoClient = http.Client{
 var lastGeocodCall time.Time
 
 func Geocode(place string) (float64, float64, error) {
-	// Rate limiting: respecter le délai min entre appels à l'API Nominatim
 	if !lastGeocodCall.IsZero() {
 		elapsed := time.Since(lastGeocodCall)
 		if elapsed < time.Second {
