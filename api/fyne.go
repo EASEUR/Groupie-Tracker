@@ -2,6 +2,7 @@
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -37,6 +38,7 @@ func FyneWindow() {
 
 		artists, err := GetArtists()
 		if err != nil {
+			log.Printf("❌ Erreur API GetArtists: %v\n", err)
 			resultContainer.Objects = []fyne.CanvasObject{
 				widget.NewCard("Erreur", "", widget.NewLabel("Erreur: "+err.Error())),
 			}
@@ -107,14 +109,17 @@ func FyneWindow() {
 				return func() {
 					rels, err := GetRelations()
 					if err != nil {
+						log.Printf("❌ Erreur API GetRelations pour artiste %d: %v\n", aID, err)
 						ll.SetText("Erreur: " + err.Error())
 						return
 					}
 					locations := GetArtistLocations(aID, rels)
 					if len(locations) == 0 {
+						log.Printf("⚠️  Aucun lieu trouvé pour l'artiste %d\n", aID)
 						ll.SetText("Aucun lieu trouvé")
 						return
 					}
+					log.Printf("✅ Lieux trouvés pour artiste %d: %d lieux\n", aID, len(locations))
 					var sb strings.Builder
 					sb.WriteString(fmt.Sprintf("Lieux (%d):\n", len(locations)))
 					for _, loc := range locations {
